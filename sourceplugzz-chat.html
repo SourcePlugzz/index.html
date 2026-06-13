@@ -137,7 +137,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;background:#0a0a0a;color:#fff
 // ==============================
 // PASTE YOUR API KEY HERE
 // ==============================
-const API_KEY    = "YOUR_NEW_API_KEY_HERE";
+const WORKER_URL = "sourceplugzz-chat.broken-glitter-2f0b.workers.dev";
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzRX0GZfM_8QzJphhxD8BAzE03lH-ZKcXmRPbqqJK7YNpT3MOgnJvZQVJyjt-uehcyX/exec";
 
 let history      = [];
@@ -240,19 +240,12 @@ async function sendMessage() {
   }
 
   try {
-    const res  = await fetch("https://api.anthropic.com/v1/messages", {
+    const res  = await fetch(WORKER_URL, {
       method:  "POST",
-      headers: {
-        "Content-Type":      "application/json",
-        "x-api-key":         API_KEY,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-request-header": "true"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model:      "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        system:     buildSystemPrompt(),
-        messages:   messagesPayload
+        system:   buildSystemPrompt(),
+        messages: messagesPayload
       })
     });
 
