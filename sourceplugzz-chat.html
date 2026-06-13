@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SourcePlugzz — 24/7 Support</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Helvetica Neue',Arial,sans-serif;background:#0a0a0a;color:#fff;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+.header{background:#000;border-bottom:1px solid #1a1a1a;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.header-logo{width:38px;height:38px;border-radius:9px;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#000;}
+.header-info h1{font-size:15px;font-weight:700;letter-spacing:0.4px;}
+.header-info p{font-size:11px;color:#555;margin-top:1px;}
+.status-dot{width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.staff-badge{margin-left:auto;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;}
+.staff-badge.owner{background:#fff;color:#000;}
+.staff-badge.admin{background:#333;color:#fff;}
+.staff-badge.none{background:transparent;border:1px solid #2a2a2a;color:#444;font-size:10px;}
+.messages{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;}
+.messages::-webkit-scrollbar{width:3px;}
+.messages::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+.msg{display:flex;gap:10px;max-width:85%;animation:fadeUp 0.2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg.bot{align-self:flex-start;}
+.msg.system{align-self:center;max-width:100%;}
+.avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px;}
+.bot .avatar{background:#fff;color:#000;font-size:9px;}
+.user .avatar{background:#222;color:#888;font-size:9px;}
+.bubble{padding:11px 15px;border-radius:18px;font-size:14px;line-height:1.6;word-break:break-word;}
+.bot .bubble{background:#141414;border:1px solid #222;border-bottom-left-radius:4px;color:#ddd;}
+.user .bubble{background:#fff;color:#000;border-bottom-right-radius:4px;font-weight:500;}
+.system-bubble{background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:8px 14px;font-size:12px;color:#444;text-align:center;}
+.typing .bubble{padding:14px 18px;}
+.typing-dots{display:flex;gap:5px;align-items:center;}
+.typing-dots span{width:6px;height:6px;background:#444;border-radius:50%;animation:bounce 1.2s infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+.staff-panel{background:#0d0d0d;border-top:1px solid #1a1a1a;flex-shrink:0;overflow:hidden;max-height:0;transition:max-height 0.3s ease;}
+.staff-panel.open{max-height:320px;}
+.staff-panel-inner{padding:14px 16px;}
+.staff-panel h3{font-size:11px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.staff-btn{background:#111;border:1px solid #222;color:#ccc;padding:10px 12px;border-radius:8px;font-size:12px;cursor:pointer;text-align:left;transition:all 0.15s;line-height:1.4;font-family:inherit;}
+.staff-btn:hover{background:#1a1a1a;border-color:#333;color:#fff;}
+.staff-btn span{display:block;font-size:10px;color:#444;margin-top:2px;}
+.staff-input-row{display:flex;gap:8px;margin-top:10px;}
+.staff-input{flex:1;background:#111;border:1px solid #222;color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;font-family:inherit;}
+.staff-input:focus{border-color:#333;}
+.staff-input::placeholder{color:#333;}
+.staff-submit{background:#fff;color:#000;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.panel-close{background:transparent;border:none;color:#333;font-size:11px;cursor:pointer;margin-top:10px;padding:0;font-family:inherit;}
+.panel-close:hover{color:#666;}
+.action-form{margin-top:10px;}
+.action-form label{font-size:11px;color:#444;display:block;margin-bottom:4px;}
+.quick-replies{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px;flex-shrink:0;}
+.qr-btn{background:transparent;border:1px solid #222;color:#555;padding:7px 13px;border-radius:20px;font-size:12px;cursor:pointer;transition:all 0.15s;white-space:nowrap;font-family:inherit;}
+.qr-btn:hover{background:#111;border-color:#444;color:#ccc;}
+.input-area{background:#000;border-top:1px solid #111;padding:12px 16px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;}
+.input-area textarea{flex:1;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:22px;color:#fff;font-size:14px;padding:11px 16px;resize:none;outline:none;font-family:inherit;max-height:120px;min-height:44px;line-height:1.4;transition:border-color 0.15s;}
+.input-area textarea:focus{border-color:#333;}
+.input-area textarea::placeholder{color:#333;}
+.send-btn{width:44px;height:44px;background:#fff;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.15s,background 0.15s;}
+.send-btn:hover{background:#ddd;transform:scale(1.05);}
+.send-btn:disabled{background:#111;cursor:not-allowed;transform:none;}
+.send-btn svg{width:18px;height:18px;}
+.login-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.login-overlay.show{opacity:1;pointer-events:all;}
+.login-box{background:#0d0d0d;border:1px solid #222;border-radius:14px;padding:28px 24px;width:280px;}
+.login-box h2{font-size:16px;font-weight:700;margin-bottom:6px;}
+.login-box p{font-size:12px;color:#444;margin-bottom:18px;}
+.login-box input{width:100%;background:#111;border:1px solid #222;color:#fff;padding:12px 14px;border-radius:10px;font-size:16px;letter-spacing:4px;outline:none;font-family:inherit;text-align:center;margin-bottom:12px;}
+.login-box input:focus{border-color:#444;}
+.login-box input::placeholder{letter-spacing:0;font-size:13px;color:#333;}
+.login-btn{width:100%;background:#fff;color:#000;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.login-btn:hover{background:#ddd;}
+.login-cancel{width:100%;background:transparent;border:none;color:#333;font-size:12px;cursor:pointer;margin-top:10px;padding:6px;font-family:inherit;}
+.login-cancel:hover{color:#666;}
+.login-error{color:#ef4444;font-size:12px;text-align:center;margin-top:8px;}
+.footer-note{text-align:center;font-size:10px;color:#1a1a1a;padding:4px 0 8px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">SP</div>
+  <div class="header-info">
+    <h1>SourcePlugzz Support</h1>
+    <p><span class="status-dot"></span>AI Assistant &mdash; 24/7</p>
+  </div>
+  <button class="staff-badge none" id="staffBadge" onclick="openLogin()">Staff Login</button>
+</div>
+
+<div class="staff-panel" id="staffPanel">
+  <div class="staff-panel-inner">
+    <h3 id="panelTitle">Staff Actions</h3>
+    <div class="staff-grid" id="staffGrid"></div>
+    <div class="action-form" id="actionForm" style="display:none"></div>
+    <button class="panel-close" onclick="closePanel()">&#x2715; Close panel</button>
+  </div>
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="quick-replies" id="quickReplies">
+  <button class="qr-btn" onclick="sendQuick('Check my order status')">Order status</button>
+  <button class="qr-btn" onclick="sendQuick('What products do you carry?')">Products</button>
+  <button class="qr-btn" onclick="sendQuick('How long does shipping take?')">Shipping</button>
+  <button class="qr-btn" onclick="sendQuick('How do I place an order?')">How to order</button>
+</div>
+
+<div class="input-area">
+  <textarea id="userInput" placeholder="Ask anything..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+  <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M22 2L11 13" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+<div class="footer-note">SourcePlugzz &mdash; Premium Apparel &amp; Accessories</div>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>Staff Access</h2>
+    <p>Enter your PIN to continue</p>
+    <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="10" onkeydown="if(event.key==='Enter')verifyPin()">
+    <button class="login-btn" onclick="verifyPin()">Verify</button>
+    <button class="login-cancel" onclick="closeLogin()">Cancel</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<script>
+// ==============================
+// PASTE YOUR API KEY HERE
+// ==============================
+const API_KEY    = "YOUR_NEW_API_KEY_HERE";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzRX0GZfM_8QzJphhxD8BAzE03lH-ZKcXmRPbqqJK7YNpT3MOgnJvZQVJyjt-uehcyX/exec";
+
+let history      = [];
+let staffSession = null;
+let botKnowledge = "";
+
+function buildSystemPrompt() {
+  return `You are the official AI support assistant for SourcePlugzz, a premium reselling business based in Chicago. You are friendly, professional, and knowledgeable. You speak with confidence — never stiff, always clear and helpful.
+
+ABOUT SOURCEPLUGZZ:
+- Premium reseller of name brand apparel, shoes, accessories, and electronics
+- Products: AirPod Max, Sp5der hoodies, Essentials hoodies and shorts, designer fragrances, Jordans, Nike, Yeezy, New Balance, and more — inventory always changing
+- Contact: support@sourceplugz.com | (312) 883-6139 | Instagram: @sourceplugzz
+
+HOW TO ORDER:
+1. Fill out the order form (link in Instagram bio @sourceplugzz)
+2. Get order confirmation email with order number (SP-XXXX)
+3. Receive Square invoice with pricing — review and pay
+4. Order processed and shipped after payment
+5. Auto tracking email sent once shipped
+
+ORDER LOOKUP:
+- When a customer asks about their order, ask for their order number (SP-XXXX) and email
+- The system will fetch live data automatically
+- Report back exactly what the data says — never guess
+
+MEMBERSHIP AND POINTS:
+- Customers can join the SourcePlugzz membership program at the rewards link in the Instagram bio
+- Members earn 1 point per dollar spent
+- Refer a friend who completes a purchase = 35 points
+- Join bonus = 25 points
+- First completed order = 50 points
+- Redemption: 100pts = $5 off, 250pts = $15 off, 500pts = free shipping, 1000pts = VIP, 2500pts = exclusive rewards
+- Tiers: Bronze (0-499) Silver (500-1499) Gold (1500-4999) Platinum (5000+)
+- For points balance, ask for their Member ID or email
+
+CURRENT BUSINESS INFO:
+${botKnowledge || "Standard inventory and policies apply."}
+
+RULES:
+- Never share internal supplier links
+- Never guess order details — only report what the system returns
+- If you cannot help, direct to support@sourceplugz.com or @sourceplugzz
+- Keep responses concise and helpful
+- If someone is upset, stay calm and direct them to support`;
+}
+
+window.onload = async () => {
+  await loadBotKnowledge();
+  setTimeout(() => {
+    addBotMessage("Hey! Welcome to SourcePlugzz support.\n\nI can help you check your order, look up your points, answer product questions, and more. What can I help you with?");
+  }, 400);
+};
+
+async function loadBotKnowledge() {
+  try {
+    const res  = await fetch(WEBAPP_URL + "?getKnowledge=true");
+    const data = await res.json();
+    if (data.knowledge) botKnowledge = data.knowledge;
+  } catch(e) {
+    console.log("Knowledge load failed:", e);
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById("userInput");
+  const text  = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  autoResize(input);
+  hideQuickReplies();
+  addUserMessage(text);
+  history.push({ role:"user", content:text });
+  setLoading(true);
+  showTyping();
+
+  // Check if message needs a live lookup
+  const needsLookup = /order|status|track|point|member|referral|balance|paid|shipped/i.test(text);
+  let liveData = null;
+
+  if (needsLookup) {
+    const allText     = text + " " + JSON.stringify(history);
+    const orderMatch  = allText.match(/SP-\d{4}/i);
+    const memberMatch = allText.match(/SP-\d{5}/i);
+    const emailMatch  = text.match(/[\w.-]+@[\w.-]+\.\w+/);
+    const identifier  = orderMatch?.[0] || memberMatch?.[0] || emailMatch?.[0];
+    if (identifier) liveData = await fetchCustomerData(identifier);
+  }
+
+  const messagesPayload = [...history];
+  if (liveData) {
+    const ctx = liveData.found
+      ? `[LIVE DATA FROM SHEET]: ${JSON.stringify(liveData)}`
+      : `[LIVE DATA FROM SHEET]: No record found for that identifier.`;
+    messagesPayload[messagesPayload.length - 1] = {
+      role: "user",
+      content: text + "\n\n" + ctx
+    };
+  }
+
+  try {
+    const res  = await fetch("https://api.anthropic.com/v1/messages", {
+      method:  "POST",
+      headers: {
+        "Content-Type":      "application/json",
+        "x-api-key":         API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-request-header": "true"
+      },
+      body: JSON.stringify({
+        model:      "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system:     buildSystemPrompt(),
+        messages:   messagesPayload
+      })
+    });
+
+    const data  = await res.json();
+    const reply = data.content?.[0]?.text || "Sorry, something went wrong. Please contact support@sourceplugz.com";
+    removeTyping();
+    addBotMessage(reply);
+    history.push({ role:"assistant", content:reply });
+
+  } catch(err) {
+    removeTyping();
+    addBotMessage("Having trouble connecting. Please contact support@sourceplugz.com or DM @sourceplugzz.");
+  }
+
+  setLoading(false);
+}
+
+async function fetchCustomerData(identifier) {
+  try {
+    const isEmail = identifier.includes("@");
+    const url     = WEBAPP_URL + (isEmail
+      ? "?email="    + encodeURIComponent(identifier)
+      : "?memberID=" + encodeURIComponent(identifier));
+    const res  = await fetch(url);
+    return await res.json();
+  } catch(e) {
+    return null;
+  }
+}
+
+function sendQuick(text) {
+  document.getElementById("userInput").value = text;
+  sendMessage();
+}
+
+function hideQuickReplies() {
+  document.getElementById("quickReplies").style.display = "none";
+}
+
+// ==============================
+// STAFF LOGIN
+// ==============================
+
+function openLogin() {
+  if (staffSession) { togglePanel(); return; }
+  document.getElementById("loginOverlay").classList.add("show");
+  setTimeout(() => document.getElementById("pinInput").focus(), 100);
+}
+
+function closeLogin() {
+  document.getElementById("loginOverlay").classList.remove("show");
+  document.getElementById("pinInput").value = "";
+  document.getElementById("loginError").textContent = "";
+}
+
+async function verifyPin() {
+  const pin = document.getElementById("pinInput").value.trim();
+  if (!pin) return;
+
+  try {
+    const res  = await fetch(WEBAPP_URL + "?staffPIN=" + encodeURIComponent(pin));
+    const data = await res.json();
+
+    if (data.verified) {
+      staffSession    = { name:data.name, role:data.role };
+      window._staffPIN = pin;
+      closeLogin();
+      updateStaffBadge();
+      buildStaffPanel();
+      openPanel();
+      addSystemMessage("Staff session started — " + data.name + " (" + data.role + ")");
+    } else {
+      document.getElementById("loginError").textContent = "Incorrect PIN. Try again.";
+      document.getElementById("pinInput").value = "";
+    }
+  } catch(e) {
+    document.getElementById("loginError").textContent = "Connection error. Try again.";
+  }
+}
+
+function updateStaffBadge() {
+  const badge = document.getElementById("staffBadge");
+  if (!staffSession) {
+    badge.className   = "staff-badge none";
+    badge.textContent = "Staff Login";
+    return;
+  }
+  badge.className   = "staff-badge " + staffSession.role;
+  badge.textContent = staffSession.role === "owner" ? "Owner" : "Admin";
+}
+
+function logoutStaff() {
+  staffSession     = null;
+  window._staffPIN = null;
+  updateStaffBadge();
+  closePanel();
+  addSystemMessage("Staff session ended.");
+}
+
+function buildStaffPanel() {
+  const grid = document.getElementById("staffGrid");
+  document.getElementById("panelTitle").textContent = staffSession.name + " — " + staffSession.role.toUpperCase();
+
+  const actions = [
+    { label:"Update Order Status", sub:"Change status + tracking", action:"updateStatus"    },
+    { label:"Adjust Points",       sub:"Set customer points",      action:"updatePoints"     },
+    { label:"Update Bot Info",     sub:"Feed new inventory/policy",action:"updateKnowledge"  },
+    { label:"Log Out",             sub:"End staff session",        action:"logout"           }
+  ];
+
+  if (staffSession.role === "owner") {
+    actions.splice(3, 0, { label:"Add Admin", sub:"Create new staff PIN", action:"addAdmin" });
+  }
+
+  grid.innerHTML = actions.map(a =>
+    `<button class="staff-btn" onclick="staffAction('${a.action}')">${a.label}<span>${a.sub}</span></button>`
+  ).join("");
+}
+
+function staffAction(action) {
+  if (action === "logout") { logoutStaff(); return; }
+
+  const form = document.getElementById("actionForm");
+  form.style.display = "block";
+
+  const forms = {
+    updateStatus:    `<label>Order Number &amp; New Status</label>
+                      <div class="staff-input-row">
+                        <input class="staff-input" id="f_order" placeholder="SP-0001">
+                        <input class="staff-input" id="f_status" placeholder="Paid / Shipped / Delivered">
+                      </div>
+                      <div class="staff-input-row" style="margin-top:6px">
+                        <input class="staff-input" id="f_tracking" placeholder="Tracking number (optional)">
+                        <button class="staff-submit" onclick="submitStaffAction('updateStatus')">Update</button>
+                      </div>`,
+    updatePoints:    `<label>Member ID or Email &amp; Points</label>
+                      <div class="staff-input-row">
+                        <input class="staff-input" id="f_member" placeholder="SP-48291 or email">
+                        <input class="staff-input" id="f_points" placeholder="New total" type="number">
+                        <button class="staff-submit" onclick="submitStaffAction('updatePoints')">Set</button>
+                      </div>`,
+    updateKnowledge: `<label>Category (inventory / shipping / policy / announcement)</label>
+                      <div class="staff-input-row">
+                        <input class="staff-input" id="f_cat" placeholder="inventory">
+                        <button class="staff-submit" onclick="submitStaffAction('updateKnowledge')">Save</button>
+                      </div>
+                      <div class="staff-input-row" style="margin-top:6px">
+                        <textarea class="staff-input" id="f_info" placeholder="Enter updated info..." rows="2" style="border-radius:8px;padding:8px 12px;resize:none"></textarea>
+                      </div>`,
+    addAdmin:        `<label>New Admin Name &amp; PIN</label>
+                      <div class="staff-input-row">
+                        <input class="staff-input" id="f_aname" placeholder="Admin name">
+                        <input class="staff-input" id="f_apin" placeholder="PIN" type="password">
+                        <button class="staff-submit" onclick="submitStaffAction('addAdmin')">Add</button>
+                      </div>`
+  };
+
+  form.innerHTML = forms[action] || "";
+}
+
+async function submitStaffAction(action) {
+  if (!window._staffPIN) {
+    const pin = prompt("Re-enter your PIN to confirm:");
+    if (!pin) return;
+    window._staffPIN = pin;
+  }
+
+  // Use URLSearchParams to avoid CORS issues
+  const params = new URLSearchParams();
+  params.append("staffPIN", window._staffPIN);
+  params.append("action",   action);
+
+  if (action === "updateStatus") {
+    params.append("orderNumber", document.getElementById("f_order")?.value?.trim()   || "");
+    params.append("status",      document.getElementById("f_status")?.value?.trim()  || "");
+    params.append("tracking",    document.getElementById("f_tracking")?.value?.trim()|| "");
+  }
+  if (action === "updatePoints") {
+    params.append("memberID", document.getElementById("f_member")?.value?.trim() || "");
+    params.append("points",   document.getElementById("f_points")?.value          || "0");
+  }
+  if (action === "updateKnowledge") {
+    params.append("category", document.getElementById("f_cat")?.value?.trim()  || "");
+    params.append("info",     document.getElementById("f_info")?.value?.trim() || "");
+  }
+  if (action === "addAdmin") {
+    params.append("name", document.getElementById("f_aname")?.value?.trim() || "");
+    params.append("pin",  document.getElementById("f_apin")?.value?.trim()  || "");
+  }
+
+  try {
+    const res  = await fetch(WEBAPP_URL, {
+      method:  "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body:    params.toString()
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      addSystemMessage("Done: " + data.message);
+      document.getElementById("actionForm").style.display = "none";
+      if (action === "updateKnowledge") await loadBotKnowledge();
+    } else {
+      addSystemMessage("Error: " + (data.error || "Unknown error"));
+      if (data.error === "Unauthorized") window._staffPIN = null;
+    }
+  } catch(e) {
+    addSystemMessage("Connection error. Try again.");
+  }
+}
+
+// ==============================
+// PANEL
+// ==============================
+
+function openPanel()   { document.getElementById("staffPanel").classList.add("open"); }
+function closePanel()  { document.getElementById("staffPanel").classList.remove("open"); document.getElementById("actionForm").style.display="none"; }
+function togglePanel() { document.getElementById("staffPanel").classList.toggle("open"); }
+
+// ==============================
+// MESSAGE HELPERS
+// ==============================
+
+function addBotMessage(text) {
+  const msgs = document.getElementById("messages");
+  const msg  = document.createElement("div");
+  msg.className = "msg bot";
+  msg.innerHTML = `<div class="avatar">SP</div><div class="bubble">${formatText(text)}</div>`;
+  msgs.appendChild(msg);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMessage(text) {
+  const msgs = document.getElementById("messages");
+  const msg  = document.createElement("div");
+  msg.className = "msg user";
+  msg.innerHTML = `<div class="avatar">You</div><div class="bubble">${formatText(text)}</div>`;
+  msgs.appendChild(msg);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addSystemMessage(text) {
+  const msgs = document.getElementById("messages");
+  const msg  = document.createElement("div");
+  msg.className = "msg system";
+  msg.innerHTML = `<div class="system-bubble">${text}</div>`;
+  msgs.appendChild(msg);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById("messages");
+  const t    = document.createElement("div");
+  t.className = "msg bot typing";
+  t.id        = "typingIndicator";
+  t.innerHTML = `<div class="avatar">SP</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(t);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById("typingIndicator");
+  if (t) t.remove();
+}
+
+function formatText(t) {
+  return t
+    .replace(/&/g,  "&amp;")
+    .replace(/</g,  "&lt;")
+    .replace(/>/g,  "&gt;")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n/g, "<br>");
+}
+
+function setLoading(s) {
+  document.getElementById("sendBtn").disabled   = s;
+  document.getElementById("userInput").disabled = s;
+}
+
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+}
+</script>
+</body>
+</html>
